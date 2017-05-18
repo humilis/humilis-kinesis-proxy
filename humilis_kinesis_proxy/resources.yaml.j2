@@ -96,7 +96,7 @@ resources:
                       {% if resource.sent_at_path or sent_at_path %}
                       ', "sentAt" : "' + $input.path('$.{{resource.sent_at_path or sent_at_path}}') +
                       {% endif %}
-                      '", "context" : {"api_id" : "' + "$context.apiId" + '", "http_method" : "' + "$context.httpMethod" + '", "stage" : "' + "$context.stage" + '", "request_id" : "' + "$context.requestId" + '", "resource_path" : "'+ "$context.resourcePath" + '", "resource_id" : "' + "$context.resourceId" + '", "identity" : {"source_ip" : "' + "$context.identity.sourceIp" + '", "user-agent" : "' + "$context.identity.userAgent" + '", "account_id" : "' + "$context.identity.accountId" + '", "api_key" : "' + "$context.identity.apiKey" + '", "caller" : "' + "$context.identity.caller" + '", "user" : "' + "$context.identity.user" + '", "user_arn" : "' + "$context.identity.userArn" + '"}}}')
+                      '", "context" : {"apiId" : "' + "$context.apiId" + '", "httpMethod" : "' + "$context.httpMethod" + '", "stage" : "' + "$context.stage" + '", "requestId" : "' + "$context.requestId" + '", "resourcePath" : "'+ "$context.resourcePath" + '", "resourceId" : "' + "$context.resourceId" + '", "identity" : {"sourceIp" : "' + "$context.identity.sourceIp" + '", "userAgent" : "' + "$context.identity.userAgent" + '", "accountId" : "' + "$context.identity.accountId" + '", "apiKey" : "' + "$context.identity.apiKey" + '", "caller" : "' + "$context.identity.caller" + '", "user" : "' + "$context.identity.user" + '", "userArn" : "' + "$context.identity.userArn" + '"}}}')
                       { 
                          "Data": "$util.base64Encode($payload)",
                          {% if resource.partition_key_path or partition_key_path %}
