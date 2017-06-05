@@ -3,7 +3,7 @@ resources:
     RestApi:
       Type: "AWS::ApiGateway::RestApi"
       Properties:
-        Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}"
+        Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}-{{6|uuid}}"
 
     {% for resource in api_resources %}
     Role{{resource.path.title()}}:
