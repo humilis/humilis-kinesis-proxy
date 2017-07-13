@@ -1,4 +1,5 @@
 ---
+{% set already_created_resources=[] %}
 resources:
     RestApi:
       Type: "AWS::ApiGateway::RestApi"
@@ -6,7 +7,8 @@ resources:
         Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}-{{6|uuid}}"
 
     {% for resource in api_resources %}
-    Role{{resource.path.title()}}:
+    {% set resid = resource.path.title()|replace('/', '') %}
+    Role{{resid}}:
       Type: "AWS::IAM::Role"
       Properties:
         AssumeRolePolicyDocument:
@@ -40,21 +42,53 @@ resources:
                          {"Ref": "AWS::AccountId"}, ":", "stream/",
                          "{{resource.path.stream_name or stream_name}}"]
 
-    Resource{{resource.path.title()}}:
+    # Create parent resources
+    {% if '/' in resource.path %}
+    {% set prevpath = '' %}
+    {% for path in resource.path.split('/')[:-1] %}
+    {% set subresid = (prevpath+path) %}
+    {% if subresid not in already_created_resources %}
+    {% set _ = already_created_resources.append(subresid) %}
+    Resource{{subresid}}:
       Type: "AWS::ApiGateway::Resource"
       Properties:
         RestApiId: {"Ref": "RestApi"}
         ParentId:
+            {% if prevpath %}
+            {"Ref": Resource{{prevpath}}}
+            {% else %}
             "Fn::GetAtt":
               - RestApi
               - RootResourceId
-        PathPart: "{{resource.path}}"
+            {% endif %}
+        PathPart: "{{path}}"
+    {% endif %}
+    {% set prevpath = prevpath+path %}
+    {% endfor %}
+    {% endif %}
 
-    MethodPost{{resource.path.title()}}:
+    {% if resid not in already_created_resources %}
+    {% set _ = already_created_resources.append(resid) %}
+    Resource{{resid}}:
+      Type: "AWS::ApiGateway::Resource"
+      Properties:
+        RestApiId: {"Ref": "RestApi"}
+        ParentId:
+            {% if '/' in resource.path %}
+            {"Ref": Resource{{''.join(resource.path.split('/')[:-1])}}}
+            {% else %}
+            "Fn::GetAtt":
+              - RestApi
+              - RootResourceId
+            {% endif %}
+        PathPart: "{{resource.path.split('/')[-1]}}"
+    {% endif %}
+
+    MethodPost{{resid}}:
       Type: "AWS::ApiGateway::Method"
       Properties:
         RestApiId: {"Ref": "RestApi"}
-        ResourceId: {"Ref": "Resource{{resource.path.title()}}"}
+        ResourceId: {"Ref": "Resource{{resid}}"}
         ApiKeyRequired: yes
         HttpMethod: POST
         AuthorizationType: NONE
@@ -67,7 +101,7 @@ resources:
         Integration:
           Type: AWS
           IntegrationHttpMethod: POST
-          Credentials: {"Fn::GetAtt": ["Role{{resource.path.title()}}", "Arn"]}
+          Credentials: {"Fn::GetAtt": ["Role{{resid}}", "Arn"]}
           Uri:
             "Fn::Join":
               - ""
@@ -112,10 +146,10 @@ resources:
                    "StreamName": "{{resource.path.stream_name or stream_name}}"
                 }
 
-    MethodOptions{{resource.path.title()}}:
+    MethodOptions{{resid}}:
       Type: "AWS::ApiGateway::Method"
       Properties:
-        ResourceId: {"Ref": "Resource{{resource.path.title()}}"}
+        ResourceId: {"Ref": "Resource{{resid}}"}
         RestApiId: {"Ref": "RestApi"}
         AuthorizationType: NONE
         HttpMethod: OPTIONS
@@ -146,8 +180,9 @@ resources:
       Type: "AWS::ApiGateway::Deployment"
       DependsOn:
         {% for resource in api_resources %}
-        - MethodPost{{resource.path.title()}}
-        - MethodOptions{{resource.path.title()}}
+        {% set resid = resource.path.title()|replace('/', '') %}
+        - MethodPost{{resid}}
+        - MethodOptions{{resid}}
         {% endfor %}
       Properties:
           Description: "{{__context.environment.name}} ({{__context.stage}})"
