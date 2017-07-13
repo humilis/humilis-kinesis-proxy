@@ -1,4 +1,5 @@
 ---
+{% set globs = {"prevpath": ""} %}
 {% set already_created_resources=[] %}
 resources:
     RestApi:
@@ -7,7 +8,7 @@ resources:
         Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}-{{6|uuid}}"
 
     {% for resource in api_resources %}
-    {% set resid = resource.path.title()|replace('/', '') %}
+    {% set resid = resource.path|replace('/', '') %}
     Role{{resid}}:
       Type: "AWS::IAM::Role"
       Properties:
@@ -44,9 +45,9 @@ resources:
 
     # Create parent resources
     {% if '/' in resource.path %}
-    {% set prevpath = '' %}
-    {% for path in resource.path.split('/')[:-1] %}
-    {% set subresid = (prevpath+path) %}
+    {% set _ = globs.update({'prevpath': ''}) %}
+    {% for path in resource.path.split('/') %}
+    {% set subresid = (globs.prevpath+path)|replace('/', '') %}
     {% if subresid not in already_created_resources %}
     {% set _ = already_created_resources.append(subresid) %}
     Resource{{subresid}}:
@@ -54,8 +55,8 @@ resources:
       Properties:
         RestApiId: {"Ref": "RestApi"}
         ParentId:
-            {% if prevpath %}
-            {"Ref": Resource{{prevpath}}}
+            {% if globs.prevpath %}
+            {"Ref": Resource{{globs.prevpath|replace('/', '')}}}
             {% else %}
             "Fn::GetAtt":
               - RestApi
@@ -63,7 +64,7 @@ resources:
             {% endif %}
         PathPart: "{{path}}"
     {% endif %}
-    {% set prevpath = prevpath+path %}
+    {% set _ = globs.update({"prevpath": globs.prevpath + '/' + path}) %}
     {% endfor %}
     {% endif %}
 
@@ -180,7 +181,7 @@ resources:
       Type: "AWS::ApiGateway::Deployment"
       DependsOn:
         {% for resource in api_resources %}
-        {% set resid = resource.path.title()|replace('/', '') %}
+        {% set resid = resource.path|replace('/', '') %}
         - MethodPost{{resid}}
         - MethodOptions{{resid}}
         {% endfor %}
