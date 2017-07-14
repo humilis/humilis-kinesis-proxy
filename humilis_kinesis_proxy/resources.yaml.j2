@@ -47,7 +47,7 @@ resources:
     {% if '/' in resource.path %}
     {% set _ = globs.update({'prevpath': ''}) %}
     {% for path in resource.path.split('/') %}
-    {% set subresid = (globs.prevpath+path)|replace('/', '') %}
+    {% set subresid = globs.prevpath+path %}
     {% if subresid not in already_created_resources %}
     {% set _ = already_created_resources.append(subresid) %}
     Resource{{subresid.title()}}:
@@ -56,7 +56,7 @@ resources:
         RestApiId: {"Ref": "RestApi"}
         ParentId:
             {% if globs.prevpath %}
-            {"Ref": Resource{{globs.prevpath.title()|replace('/', '')}}}
+            {"Ref": Resource{{globs.prevpath.title()}}}
             {% else %}
             "Fn::GetAtt":
               - RestApi
@@ -64,7 +64,7 @@ resources:
             {% endif %}
         PathPart: "{{path}}"
     {% endif %}
-    {% set _ = globs.update({"prevpath": globs.prevpath + '/' + path}) %}
+    {% set _ = globs.update({"prevpath": subresid}) %}
     {% endfor %}
     {% endif %}
 
@@ -76,7 +76,7 @@ resources:
         RestApiId: {"Ref": "RestApi"}
         ParentId:
             {% if '/' in resource.path %}
-            {"Ref": Resource{{''.join(resource.path.split('/')[:-1])}}}
+            {"Ref": Resource{{''.join(resource.path.split('/')[:-1]).title()}}}
             {% else %}
             "Fn::GetAtt":
               - RestApi
