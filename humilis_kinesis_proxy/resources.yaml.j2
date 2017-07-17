@@ -7,6 +7,26 @@ resources:
       Properties:
         Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}-{{6|uuid}}"
 
+    {% if domain_name and certificate_arn %}
+    DomainName:
+        Type: "AWS::ApiGateway::DomainName"
+        Properties:
+            CertificateArn: {{certificate_arn}}
+            DomainName: {{domain_name}}
+
+    DomainNameMapping:
+       Type: "AWS::ApiGateway::BasePathMapping"
+       Properties:
+         BasePath:
+            "Fn::GetAtt":
+              - RestApi
+              - RootResourceId
+         RestApiId:
+            Ref: RestApi
+         DomainName:
+            Ref: DomainName
+    {% endif %}
+
     {% for resource in api_resources %}
     {% set resid = resource.path|replace('/', '') %}
     Role{{resid.title()}}:

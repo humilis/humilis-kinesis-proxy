@@ -4,6 +4,14 @@ meta:
         AWS API Gateway proxy to AWS Kinesis
 
     parameters:
+        domain_name:
+            description: Domain name to associate to the root resource
+            value:
+
+        certificate_arn:
+            description: ARN of the Cert for the domain name.
+            value:
+
         stream_name:
             description: The name of the target Kinesis stream
             value:
