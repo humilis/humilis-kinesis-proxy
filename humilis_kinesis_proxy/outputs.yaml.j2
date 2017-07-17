@@ -1,5 +1,13 @@
 ---
 outputs:
+    {% if domain_name and certificate_arn %}
+    DomainName:
+        Description:
+            The domain name associated to the root resource of the API
+        Vavlue:
+            Ref: DomainName
+    {% endif %}
+
     RestApiId:
         Description:
             The REST API Id
