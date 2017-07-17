@@ -17,10 +17,8 @@ resources:
     DomainNameMapping:
        Type: "AWS::ApiGateway::BasePathMapping"
        Properties:
-         BasePath:
-            "Fn::GetAtt":
-              - RestApi
-              - RootResourceId
+         BasePath: "/{{__context.stage.lower()}}"
+         Stage: "{{__context.stage.lower()}}"
          RestApiId:
             Ref: RestApi
          DomainName:
