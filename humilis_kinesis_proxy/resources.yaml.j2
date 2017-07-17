@@ -17,7 +17,6 @@ resources:
     DomainNameMapping:
        Type: "AWS::ApiGateway::BasePathMapping"
        Properties:
-         BasePath: "/{{__context.stage.lower()}}"
          Stage: "{{__context.stage.lower()}}"
          RestApiId:
             Ref: RestApi
