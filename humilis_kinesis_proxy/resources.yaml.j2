@@ -35,7 +35,7 @@ resources:
         HostedZoneName: {{'.'.join(domain_name.split('.')[-2:])}}.
         {% endif %}
         RecordSets:
-            - Name: "{{instance_name}}"
+            - Name: "{{domain_name}}"
               Type: A
               AliasTarget:
                 HostedZoneId: Z2FDTNDATAQYW2
