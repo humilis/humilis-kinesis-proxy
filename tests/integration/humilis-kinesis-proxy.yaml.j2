@@ -12,14 +12,11 @@ humilis-kinesis-proxy:
 
         - layer: kproxy
           layer_type: kinesis-proxy
-          hosted_zone_id: ZA1RMNBD0PCSQ
-          domain_name: caca.fih.io
           certificate_arn: "arn:aws:acm:us-east-1:531820706523:certificate/220d535a-69fc-4e06-b5a0-dd0169d773b5"
           sent_at_path: sentAt
           api_resources:
             - path: nfhbe
             - path: zedek/v1/import
-
 
           stream_name:
             $layer_output:
