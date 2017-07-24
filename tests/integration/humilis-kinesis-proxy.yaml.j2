@@ -16,6 +16,9 @@ humilis-kinesis-proxy:
           sent_at_path: sentAt
           api_resources:
             - path: nfhbe
+              request_parameters:
+                "querystring.hello": yes
+                "querystring.world": yes
             - path: zedek/v1/import
 
           stream_name:
