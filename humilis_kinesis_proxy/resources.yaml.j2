@@ -306,7 +306,7 @@ resources:
         - "RestApiDeployment"
         - "RestApi"
       Properties:
-        Name: "{{__context.environment.name}}-{{__context.stage}}"
+        Name: "{{__context.environment.name}}-{{__context.layer.name}}-{{__context.stage}}"
         Description: "API key for stage {{__context.stage}} of environment {{__context.environment.name}}"
         Enabled: "true"
         StageKeys:
