@@ -286,8 +286,12 @@ resources:
       DependsOn:
         {% for resource in api_resources %}
         {% set resid = resource.path|replace('/', '') %}
+        {% if not resource.method or resource.method.upper() == 'POST' %}
         - MethodPost{{resid.title()}}
+        {% endif %}
+        {% if not resource.method or resource.method.upper() == 'GET' %}
         - MethodGet{{resid.title()}}
+        {% endif %}
         - MethodOptions{{resid.title()}}
         {% endfor %}
       Properties:
