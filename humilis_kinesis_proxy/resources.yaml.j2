@@ -126,7 +126,7 @@ resources:
       Properties:
         RestApiId: {"Ref": "RestApi"}
         ResourceId: {"Ref": "Resource{{resid.title()}}"}
-        ApiKeyRequired: yes
+        ApiKeyRequired: {{api_key_required}}
         HttpMethod: GET
         AuthorizationType: NONE
         MethodResponses:
