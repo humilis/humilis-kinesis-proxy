@@ -177,10 +177,10 @@ resources:
                       #set($payload = $payload + ',')
                       #end
                       #end
-                      #set($payload = $payload + '}')
+                      #set($payload = $payload.replaceAll("\\'","'") + '}')
                       { 
                          "Data": "$util.base64Encode($payload)",
-                         "PartitionKey": "{{resource.partition_key or partition_key or 10|uuid4}}"
+                         "PartitionKey": "$context.requestId"
                       }
                    ],
                    "StreamName": "{{resource.path.stream_name or stream_name}}"
