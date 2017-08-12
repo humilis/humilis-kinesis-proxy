@@ -6,6 +6,7 @@ resources:
       Type: "AWS::ApiGateway::RestApi"
       Properties:
         Name: "{{__context.environment.name}}-{{__context.stage}}-{{__context.layer.name}}"
+        Description: "{{api_description}}"
 
     {% if domain_name and certificate_arn %}
     DomainName:
