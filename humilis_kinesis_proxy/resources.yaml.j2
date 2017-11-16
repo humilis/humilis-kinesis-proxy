@@ -220,6 +220,7 @@ resources:
                   method.response.header.Access-Control-Allow-Origin: "'*'"
           RequestTemplates:
             "application/json": |
+            {% if resource.is_batch is not defined or resource.is_batch %}
                 #set($allParams = $input.params())
                 #set($recs = $input.path('$.batch'))
                 {
@@ -250,6 +251,32 @@ resources:
                    ],
                    "StreamName": "{{resource.path.stream_name or stream_name}}"
                 }
+            {% else %}
+                #set($allParams = $input.params())
+                {
+                   "Records": [
+                      #set($datapath='$')
+                      {% if resource.partition_key_path or partition_key_path %}
+                      #set($pkpath='$.{{resource.partition_key_path or partition_key_path}}')
+                      {% endif %}
+                      #set($payload = '{"event": '
+                      + $input.json($datapath) + 
+                      {% if resource.sent_at_path or sent_at_path %}
+                      ', "sentAt" : "' + $input.path('$.{{resource.sent_at_path or sent_at_path}}') +
+                      {% endif %}
+                      '", "context" : {"apiId" : "' + "$context.apiId" + '", "httpMethod" : "' + "$context.httpMethod" + '", "stage" : "' + "$context.stage" + '", "requestId" : "' + "$context.requestId" + '", "resourcePath" : "'+ "$context.resourcePath" + '", "resourceId" : "' + "$context.resourceId" + '", "identity" : {"sourceIp" : "' + "$context.identity.sourceIp" + '", "userAgent" : "' + "$context.identity.userAgent" + '", "accountId" : "' + "$context.identity.accountId" + '", "apiKey" : "' + "$context.identity.apiKey" + '", "caller" : "' + "$context.identity.caller" + '", "user" : "' + "$context.identity.user" + '", "userArn" : "' + "$context.identity.userArn" + '"}}}')
+                      { 
+                         "Data": "$util.base64Encode($payload)",
+                         {% if resource.partition_key_path or partition_key_path %}
+                         "PartitionKey": "$input.path($pkpath)"
+                         {% else %}
+                         "PartitionKey": "{{resource.partition_key or partition_key}}"
+                         {% endif %}
+                      }
+                   ],
+                   "StreamName": "{{resource.path.stream_name or stream_name}}"
+                }
+            {% endif %}
     {% endif %}
 
     MethodOptions{{resid.title()}}:
