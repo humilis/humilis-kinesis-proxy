@@ -136,6 +136,16 @@ resources:
               method.response.header.Access-Control-Allow-Methods: true
               method.response.header.Access-Control-Allow-Origin: true
             StatusCode: '200'
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: true
+              method.response.header.Access-Control-Allow-Methods: true
+              method.response.header.Access-Control-Allow-Origin: true
+            StatusCode: '400'
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: true
+              method.response.header.Access-Control-Allow-Methods: true
+              method.response.header.Access-Control-Allow-Origin: true
+            StatusCode: '500'
         {% if resource.request_parameters %}
         RequestParameters:
           {% for k, v in resource.request_parameters.items() %}
@@ -153,8 +163,20 @@ resources:
           PassthroughBehavior: WHEN_NO_TEMPLATES
           IntegrationResponses:
               - StatusCode: 200
+                SelectionPattern: "2\\d{2}"
                 ResponseParameters:
                   method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                  method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                  method.response.header.Access-Control-Allow-Origin: "'*'"
+              - StatusCode: 400
+                SelectionPattern: "4\\d{2}"
+                ResponseParameters:
+                  method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                  method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                  method.response.header.Access-Control-Allow-Origin: "'*'"
+              - StatusCode: 500
+                SelectionPattern: "5\\d{2}"
+                ResponseParameters:
                   method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
                   method.response.header.Access-Control-Allow-Origin: "'*'"
           RequestTemplates:
@@ -179,7 +201,7 @@ resources:
                       #end
                       #end
                       #set($payload = $payload.replaceAll("\\'","'") + '}')
-                      { 
+                      {
                          "Data": "$util.base64Encode($payload)",
                          "PartitionKey": "$context.requestId"
                       }
@@ -203,6 +225,16 @@ resources:
               method.response.header.Access-Control-Allow-Methods: true
               method.response.header.Access-Control-Allow-Origin: true
             StatusCode: '200'
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: true
+              method.response.header.Access-Control-Allow-Methods: true
+              method.response.header.Access-Control-Allow-Origin: true
+            StatusCode: '400'
+          - ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: true
+              method.response.header.Access-Control-Allow-Methods: true
+              method.response.header.Access-Control-Allow-Origin: true
+            StatusCode: '500'
         Integration:
           Type: AWS
           IntegrationHttpMethod: POST
@@ -214,6 +246,19 @@ resources:
           PassthroughBehavior: WHEN_NO_TEMPLATES
           IntegrationResponses:
               - StatusCode: 200
+                SelectionPattern: "2\\d{2}"
+                ResponseParameters:
+                  method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                  method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                  method.response.header.Access-Control-Allow-Origin: "'*'"
+              - StatusCode: 400
+                SelectionPattern: "4\\d{2}"
+                ResponseParameters:
+                  method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                  method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                  method.response.header.Access-Control-Allow-Origin: "'*'"
+              - StatusCode: 500
+                SelectionPattern: "5\\d{2}"
                 ResponseParameters:
                   method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
                   method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
@@ -232,12 +277,12 @@ resources:
                       #set($pkpath='$.batch[' + $ix + '].{{resource.partition_key_path or partition_key_path}}')
                       {% endif %}
                       #set($payload = '{"event": '
-                      + $input.json($datapath) + 
+                      + $input.json($datapath) +
                       {% if resource.sent_at_path or sent_at_path %}
                       ', "sentAt" : "' + $input.path('$.{{resource.sent_at_path or sent_at_path}}') +
                       {% endif %}
                       '", "context" : {"apiId" : "' + "$context.apiId" + '", "httpMethod" : "' + "$context.httpMethod" + '", "stage" : "' + "$context.stage" + '", "requestId" : "' + "$context.requestId" + '", "resourcePath" : "'+ "$context.resourcePath" + '", "resourceId" : "' + "$context.resourceId" + '", "identity" : {"sourceIp" : "' + "$context.identity.sourceIp" + '", "userAgent" : "' + "$context.identity.userAgent" + '", "accountId" : "' + "$context.identity.accountId" + '", "apiKey" : "' + "$context.identity.apiKey" + '", "caller" : "' + "$context.identity.caller" + '", "user" : "' + "$context.identity.user" + '", "userArn" : "' + "$context.identity.userArn" + '"}}}')
-                      { 
+                      {
                          "Data": "$util.base64Encode($payload)",
                          {% if resource.partition_key_path or partition_key_path %}
                          "PartitionKey": "$input.path($pkpath)"
@@ -260,12 +305,12 @@ resources:
                       #set($pkpath='$.{{resource.partition_key_path or partition_key_path}}')
                       {% endif %}
                       #set($payload = '{"event": '
-                      + $input.json($datapath) + 
+                      + $input.json($datapath) +
                       {% if resource.sent_at_path or sent_at_path %}
                       ', "sentAt" : "' + $input.path('$.{{resource.sent_at_path or sent_at_path}}') +
                       {% endif %}
                       '", "context" : {"apiId" : "' + "$context.apiId" + '", "httpMethod" : "' + "$context.httpMethod" + '", "stage" : "' + "$context.stage" + '", "requestId" : "' + "$context.requestId" + '", "resourcePath" : "'+ "$context.resourcePath" + '", "resourceId" : "' + "$context.resourceId" + '", "identity" : {"sourceIp" : "' + "$context.identity.sourceIp" + '", "userAgent" : "' + "$context.identity.userAgent" + '", "accountId" : "' + "$context.identity.accountId" + '", "apiKey" : "' + "$context.identity.apiKey" + '", "caller" : "' + "$context.identity.caller" + '", "user" : "' + "$context.identity.user" + '", "userArn" : "' + "$context.identity.userArn" + '"}}}')
-                      { 
+                      {
                          "Data": "$util.base64Encode($payload)",
                          {% if resource.partition_key_path or partition_key_path %}
                          "PartitionKey": "$input.path($pkpath)"
